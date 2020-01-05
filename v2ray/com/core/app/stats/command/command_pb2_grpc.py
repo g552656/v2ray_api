@@ -24,6 +24,11 @@ class StatsServiceStub(object):
         request_serializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.QueryStatsRequest.SerializeToString,
         response_deserializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.QueryStatsResponse.FromString,
         )
+    self.GetSysStats = channel.unary_unary(
+        '/v2ray.core.app.stats.command.StatsService/GetSysStats',
+        request_serializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.SysStatsRequest.SerializeToString,
+        response_deserializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.SysStatsResponse.FromString,
+        )
 
 
 class StatsServiceServicer(object):
@@ -44,6 +49,13 @@ class StatsServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetSysStats(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_StatsServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -56,6 +68,11 @@ def add_StatsServiceServicer_to_server(servicer, server):
           servicer.QueryStats,
           request_deserializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.QueryStatsRequest.FromString,
           response_serializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.QueryStatsResponse.SerializeToString,
+      ),
+      'GetSysStats': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSysStats,
+          request_deserializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.SysStatsRequest.FromString,
+          response_serializer=v2ray_dot_com_dot_core_dot_app_dot_stats_dot_command_dot_command__pb2.SysStatsResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

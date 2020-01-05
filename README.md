@@ -5,16 +5,16 @@
 1. 下载
 
    ```bash
-   git clone https://github.com/spencer404/v2ray-api.git
+   git clone https://github.com/yunwei/v2ray-api.git
    ```
 
 2. 安装依赖
 
    ```bash
-   pip3.6 install grpcio grpcio-tools
+   pip3 install grpcio grpcio-tools
    ```
 
-3. 编译proto到v2ray目录（此步可忽略，默认为v3.41）
+3. 编译proto到v2ray目录（此步可忽略，默认为v4.22.1）
 
    ```bash
    cd v2ray-api
@@ -24,7 +24,7 @@
    rm -rf v2ray
    mkdir v2ray
    # 编译到v2ray目录
-   python3.6 compile.py -s v2ray-core -d .
+   python3 compile.py -s v2ray-core -d .
    ```
 
 
