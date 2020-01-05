@@ -1,5 +1,7 @@
 import os
 import sys
+import re
+
 sys.path.append(os.path.dirname(__file__))
 import grpc
 from grpc._channel import _Rendezvous
@@ -62,6 +64,51 @@ class VMessInbound(Proxy):
 class Client(object):
     def __init__(self, address, port):
         self._channel = grpc.insecure_channel(f"{address}:{port}")
+
+    def get_all_traffic(self, reset=False):
+        """
+        获取v2ray的所有流量，单位：字节
+        :param reset: 是否重置计数器
+        """
+        results = {
+            'users': {},
+            'inbound': {}
+        }
+        stub = stats_command_pb2_grpc.StatsServiceStub(self._channel)
+        try:
+            all_traffic_obj = stub.QueryStats(stats_command_pb2.QueryStatsRequest(
+                pattern=f"",
+                reset=reset
+            )).stat
+            all_traffic_str = str(all_traffic_obj)[1:-1]
+            all_traffic_list = all_traffic_str.split('\n,')
+            inbound_pattern = re.compile('name:\s*"inbound>>>(?P<tag>[^>]+)>>>traffic>>>(?P<type>uplink|downlink)"(\s*value:\s*(?P<value>\d+))?')
+            user_pattern = re.compile('name:\s*"user>>>(?P<name>[^>]+)>>>traffic>>>(?P<type>uplink|downlink)"(\s*value:\s*(?P<value>\d+))?')
+            for item in all_traffic_list:
+                item = item.strip()
+                if item.find('inbound>>>') > -1:
+                    regMatch = inbound_pattern.match(item)
+                    inbound_dict = regMatch.groupdict()
+                    if inbound_dict.get('tag'):
+                        if results['inbound'].get(inbound_dict['tag']):
+                            results['inbound'][inbound_dict['tag']][inbound_dict['type']] = int(inbound_dict['value']) if inbound_dict.get('value') else 0
+                        else:
+                            results['inbound'][inbound_dict['tag']] = {
+                                inbound_dict['type']: int(inbound_dict['value']) if inbound_dict.get('value') else 0
+                            }
+                elif item.find('user>>>') > -1:
+                    regMatch = user_pattern.match(item)
+                    user_dict = regMatch.groupdict()
+                    if user_dict.get('name'):
+                        if results['users'].get(user_dict['name']):
+                            results['users'][user_dict['name']][user_dict['type']] = int(user_dict['value']) if user_dict.get('value') else 0
+                        else:
+                            results['users'][user_dict['name']] = {
+                                user_dict['type']: int(user_dict['value']) if user_dict.get('value') else 0
+                            }
+        except grpc.RpcError:
+            pass
+        return results
 
     def get_user_traffic_downlink(self, email, reset=False):
         """
